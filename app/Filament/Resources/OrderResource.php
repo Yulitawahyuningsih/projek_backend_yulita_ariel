@@ -3,114 +3,100 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
-use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static ?string $navigationLabel = 'Pesanan';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
+        return $form->schema([
+            Forms\Components\Section::make('Info Pesanan')->schema([
                 Forms\Components\TextInput::make('order_number')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('address_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('status')
+                    ->label('No. Pesanan')
+                    ->disabled(),
+                Forms\Components\Select::make('status')
+                    ->label('Status')
+                    ->options([
+                        'Diproses'   => 'Diproses',
+                        'Dikirim'    => 'Dikirim',
+                        'Selesai'    => 'Selesai',
+                        'Dibatalkan' => 'Dibatalkan',
+                    ])
                     ->required(),
-                Forms\Components\TextInput::make('subtotal')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('shipping_cost')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('discount')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('total')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\TextInput::make('user.name')
+                    ->label('Pelanggan')
+                    ->disabled(),
                 Forms\Components\TextInput::make('payment_method')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('voucher_code')
-                    ->maxLength(255),
-            ]);
+                    ->label('Metode Pembayaran')
+                    ->disabled(),
+                Forms\Components\TextInput::make('subtotal')
+                    ->label('Subtotal')
+                    ->prefix('Rp')
+                    ->disabled(),
+                Forms\Components\TextInput::make('shipping_cost')
+                    ->label('Ongkos Kirim')
+                    ->prefix('Rp')
+                    ->disabled(),
+                Forms\Components\TextInput::make('discount')
+                    ->label('Diskon')
+                    ->prefix('Rp')
+                    ->disabled(),
+                Forms\Components\TextInput::make('total')
+                    ->label('Total')
+                    ->prefix('Rp')
+                    ->disabled(),
+            ])->columns(2),
+        ]);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('order_number')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('address_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('status'),
-                Tables\Columns\TextColumn::make('subtotal')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('shipping_cost')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('discount')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('total')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('payment_method')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('voucher_code')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+        return $table->columns([
+            Tables\Columns\TextColumn::make('order_number')
+                ->label('No. Pesanan')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('user.name')
+                ->label('Pelanggan')
+                ->searchable(),
+            Tables\Columns\BadgeColumn::make('status')
+                ->label('Status')
+                ->colors([
+                    'warning' => 'Diproses',
+                    'primary' => 'Dikirim',
+                    'success' => 'Selesai',
+                    'danger'  => 'Dibatalkan',
                 ]),
-            ]);
+            Tables\Columns\TextColumn::make('total')
+                ->label('Total')
+                ->money('IDR')
+                ->sortable(),
+            Tables\Columns\TextColumn::make('payment_method')
+                ->label('Pembayaran'),
+            Tables\Columns\TextColumn::make('created_at')
+                ->label('Tanggal')
+                ->dateTime('d M Y')
+                ->sortable(),
+        ])
+        ->defaultSort('created_at', 'desc')
+        ->actions([
+            Tables\Actions\EditAction::make(),
+        ])
+        ->bulkActions([]);
     }
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
