@@ -63,7 +63,8 @@ class OrderController extends Controller
 
         try {
             $subtotal = $carts->sum(function ($cart) {
-                return $cart->product->price * $cart->quantity;
+                $harga = $cart->product->discount_price ?? $cart->product->price;
+                return $harga * $cart->quantity;
             });
 
             $discount = 0;
@@ -99,15 +100,17 @@ class OrderController extends Controller
             ]);
 
             foreach ($carts as $cart) {
+                $harga = $cart->product->discount_price ?? $cart->product->price;
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $cart->product_id,
                     'product_variant_id' => $cart->product_variant_id,
                     'product_name' => $cart->product->name,
                     'product_image' => $cart->product->images->where('is_primary', true)->first()->image_url ?? null,
-                    'price' => $cart->product->price,
+                    'price' => $harga,
                     'quantity' => $cart->quantity,
-                    'subtotal' => $cart->product->price * $cart->quantity,
+                    'subtotal' => $harga * $cart->quantity,
                 ]);
 
                 $cart->variant->decrement('stock', $cart->quantity);
