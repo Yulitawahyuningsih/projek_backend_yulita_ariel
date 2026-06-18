@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Models\Product;
 use App\Models\Category;
-use App\Models\ProductImage;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
@@ -70,7 +69,9 @@ class ProductResource extends Resource
                         Forms\Components\FileUpload::make('image_url')
                             ->label('Gambar')
                             ->image()
+                            ->disk('public')
                             ->directory('products')
+                            ->visibility('public')
                             ->required(),
                         Forms\Components\Toggle::make('is_primary')
                             ->label('Gambar Utama')
@@ -109,6 +110,7 @@ class ProductResource extends Resource
         return $table->columns([
             Tables\Columns\ImageColumn::make('images.image_url')
                 ->label('Gambar')
+                ->disk('public')
                 ->circular(false)
                 ->size(60),
             Tables\Columns\TextColumn::make('name')
